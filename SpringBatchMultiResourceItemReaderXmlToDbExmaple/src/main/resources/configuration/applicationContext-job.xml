@@ -1,0 +1,50 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/batch
+                        http://www.springframework.org/schema/batch/spring-batch.xsd
+                        http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <batch:job id="readMultiFileJob">
+        <batch:step id="step1">
+            <batch:tasklet>
+                <batch:chunk reader="multiResourceReader"
+                             writer="mysqlItemWriter"
+                             processor="employeeFilterProcessor"
+                             commit-interval="1"/>
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+    <bean id="employeeFilterProcessor" class="com.adarsh.spring.batch.processor.EmployeeFilterProcessor" />
+
+    <bean id="multiResourceReader" class=" org.springframework.batch.item.file.MultiResourceItemReader">
+        <property name="resources" value="classpath*:file/input/employee-*.xml"/>
+        <property name="delegate" ref="xmlItemReader"/>
+    </bean>
+
+    <bean id="xmlItemReader" class="org.springframework.batch.item.xml.StaxEventItemReader">
+        <property name="fragmentRootElementName" value="employee" />
+        <property name="unmarshaller" ref="employeeUnmarshaller" />
+    </bean>
+
+    <!-- Read and map values to object, via jaxb2 -->
+    <bean id="employeeUnmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+        <property name="classesToBeBound">
+            <list>
+                <value>com.adarsh.spring.batch.model.Employee</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="mysqlItemWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="sql" value="${app.mysql.query}"/>
+        <!-- It will take care matching between object property and sql name parameter -->
+        <property name="itemSqlParameterSourceProvider">
+            <bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider"/>
+        </property>
+    </bean>
+
+</beans>
