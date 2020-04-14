@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<employees>
+    <employee empId="101">
+        <firstName>adarsh</firstName>
+        <middleName>kumar</middleName>
+        <lastName>singh</lastName>
+        <dob>13/09/1983</dob>
+        <empEmail>adarsh@kumar</empEmail>
+        <empPhone>8197416336</empPhone>
+    </employee>
+    <employee empId="102">
+        <firstName>amit</firstName>
+        <middleName>kumar</middleName>
+        <lastName>singh</lastName>
+        <dob>04/01/1986</dob>
+        <empEmail>amit@kumar</empEmail>
+        <empPhone>9902323890</empPhone>
+    </employee>
+    <employee empId="103">
+        <firstName>radha</firstName>
+        <middleName></middleName>
+        <lastName>singh</lastName>
+        <dob>05/04/1986</dob>
+        <empEmail>radha@singh</empEmail>
+        <empPhone>8197416336</empPhone>
+    </employee>
+</employees>

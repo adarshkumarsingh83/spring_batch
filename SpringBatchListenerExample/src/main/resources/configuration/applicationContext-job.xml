@@ -1,0 +1,73 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/batch
+                        http://www.springframework.org/schema/batch/spring-batch.xsd
+                        http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="fileDeletingTasklet" class="com.adarsh.spring.batch.tasklet.EmployeeFileDeletingTasklet" >
+        <property name="directory" value="file:src/main/resources/file/input/" />
+    </bean>
+
+    <batch:job id="readMultiFileJob" job-repository="jobRepository">
+        <batch:step id="readWriteCsvFiles" next="deleteDir">
+            <batch:tasklet>
+                <batch:chunk reader="multiResourceReader"
+                             writer="flatFileItemWriter"
+                             commit-interval="1"/>
+                <batch:listeners>
+                    <batch:listener ref="applicationStepListener" />
+                    <batch:listener ref="employeeItemReaderListener" />
+                    <batch:listener ref="employeeItemWriterListener" />
+                </batch:listeners>
+            </batch:tasklet>
+        </batch:step>
+
+        <batch:step id="deleteDir">
+            <batch:tasklet ref="fileDeletingTasklet" />
+        </batch:step>
+
+    </batch:job>
+
+
+
+    <bean id="multiResourceReader"
+          class=" org.springframework.batch.item.file.MultiResourceItemReader">
+        <property name="resources" value="classpath*:file/input/employee-*.csv"/>
+        <property name="delegate" ref="cvsFileItemReader"/>
+    </bean>
+
+    <bean id="cvsFileItemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
+        <property name="lineMapper">
+            <bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                <property name="lineTokenizer">
+                    <bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+                        <property name="names" value="${app.file.csv.header.name.writer}" />
+                    </bean>
+                </property>
+                <property name="fieldSetMapper">
+                    <bean class="com.adarsh.spring.batch.mapper.EmployeeFieldSetMapper"/>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- csv file writer -->
+    <bean id="flatFileItemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter">
+        <property name="resource" value="file:file/output/employee.csv"/>
+        <property name="appendAllowed" value="false"/>
+        <property name="shouldDeleteIfExists" value="true"/>
+        <property name="lineAggregator">
+            <bean class="org.springframework.batch.item.file.transform.DelimitedLineAggregator">
+                <property name="delimiter" value=","/>
+                <property name="fieldExtractor">
+                    <bean class="org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor">
+                        <property name="names" value="${app.file.csv.header.name}"/>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+</beans>

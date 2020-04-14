@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/batch
+                           http://www.springframework.org/schema/batch/spring-batch.xsd
+                           http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <batch:job id="employeeJob" restartable="true">
+        <batch:step id="step1">
+            <batch:tasklet>
+                <batch:chunk reader="cvsFileItemReader"
+                             writer="employeeWriter"
+                             commit-interval="5">
+                </batch:chunk>
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+    <bean id="cvsFileItemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
+        <property name="resource" value="classpath:file/input/employee.csv"/>
+        <property name="lineMapper">
+            <bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                <property name="lineTokenizer">
+                    <bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+                        <property name="names" value="${app.csv.head.name}"/>
+                    </bean>
+                </property>
+                <property name="fieldSetMapper">
+                    <bean class="com.adarsh.spring.batch.mapper.EmployeeFieldSetMapper"/>
+
+                    <!-- if no data type conversion, use BeanWrapperFieldSetMapper to map by name
+                    <bean  class="org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper">
+                        <property name="prototypeBeanName" value="employee" />
+                    </bean>  -->
+                </property>
+            </bean>
+        </property>
+
+    </bean>
+
+    <!-- Must set this -->
+    <bean class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">
+        <property name="jobRegistry" ref="jobRegistry" />
+    </bean>
+
+    <bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry" />
+
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+                <property name="jobDetail" ref="jobDetail" />
+                <property name="cronExpression" value="*/5 * * * * ?" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="jobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="com.adarsh.spring.batch.quartz.JobLauncherDetails" />
+        <property name="group" value="quartz-batch" />
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobName" value="employeeJob" />
+                <entry key="jobLocator" value-ref="jobRegistry" />
+                <entry key="jobLauncher" value-ref="jobLauncher" />
+                <entry key="param1" value="Adarsh" />
+                <entry key="param2" value="Radha" />
+            </map>
+        </property>
+    </bean>
+
+</beans>

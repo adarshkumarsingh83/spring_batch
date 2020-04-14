@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<employee>
+    <employee>
+        <empId>101</empId>
+        <firstName>adarsh</firstName>
+        <middleName>kumar</middleName>
+        <lastName>singh</lastName>
+        <empEmail>adarsh@kumar</empEmail>
+        <empPhone>8197416336</empPhone>
+        <dob class="sql-date">1983-09-13</dob>
+    </employee>
+    <employee>
+        <empId>102</empId>
+        <firstName>amit</firstName>
+        <middleName>kumar</middleName>
+        <lastName>singh</lastName>
+        <empEmail>amit@kumar</empEmail>
+        <empPhone>9902323890</empPhone>
+        <dob class="sql-date">1986-01-04</dob>
+    </employee>
+    <employee>
+        <empId>103</empId>
+        <firstName>radha</firstName>
+        <middleName></middleName>
+        <lastName>singh</lastName>
+        <empEmail>radha@singh</empEmail>
+        <empPhone>8197416336</empPhone>
+        <dob class="sql-date">1986-04-05</dob>
+    </employee>
+</employee>

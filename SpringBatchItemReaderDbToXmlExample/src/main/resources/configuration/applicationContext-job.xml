@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/batch
+                        http://www.springframework.org/schema/batch/spring-batch.xsd
+                        http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/util
+                        http://www.springframework.org/schema/util/spring-util.xsd">
+
+
+    <batch:job id="employeeJob">
+        <batch:step id="step1">
+            <batch:tasklet>
+                <batch:chunk reader="itemReader"
+                             writer="itemWriter"
+                             commit-interval="1"/>
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+
+    <bean id="itemReader"
+          class="org.springframework.batch.item.database.JdbcCursorItemReader"
+          scope="step">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="sql" value="${app.db.mysql.query}"/>
+        <property name="rowMapper">
+            <bean class="com.adarsh.spring.batch.mapper.EmployeeRowMapper"/>
+        </property>
+    </bean>
+
+    <bean id="itemWriter" class="org.springframework.batch.item.xml.StaxEventItemWriter">
+        <property name="resource" value="file:file/outputs/xml/employee.xml"/>
+        <property name="marshaller" ref="employeeUnmarshaller"/>
+        <property name="rootTagName" value="employee"/>
+    </bean>
+
+    <bean id="employeeUnmarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
+        <property name="aliases">
+            <util:map id="aliases">
+                <entry key="employee" value="com.adarsh.spring.batch.model.Employee"/>
+            </util:map>
+        </property>
+    </bean>
+</beans>
